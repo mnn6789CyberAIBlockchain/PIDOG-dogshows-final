@@ -2,16 +2,14 @@
 PiDog Final Project
 Christmas Performance
 
-Approximate Duration: 1 Minute
-
-Features:
-- Christmas music playing in the background
-- PiDog choreography
-- RGB light effects
-- Automatic music stop after the performance
+Timing:
+- Christmas song: 62 seconds
+- Post-song reset: approximately 1.5 seconds
 """
 
+import os
 import time
+
 from audio.music_player import MusicPlayer
 
 
@@ -19,14 +17,50 @@ from audio.music_player import MusicPlayer
 # SETTINGS
 # =================================================
 
-SHOW_DURATION = 60
+SONG_DURATION = 62.0
+RESET_TIME = 1.5
 
-MUSIC_FILE = "music/christmas_song.wav"
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
 
+MUSIC_FILE = os.path.join(
+    BASE_DIR,
+    "music",
+    "christmas_song.wav"
+)
+
+
+# =================================================
+# HELPERS
+# =================================================
 
 def pause(seconds):
-    """Pause between choreography actions."""
     time.sleep(seconds)
+
+
+def return_to_home(dog):
+    """
+    Return PiDog to a stable presentation posture
+    after the music finishes.
+    """
+
+    print("\nReturning PiDog to home posture...")
+
+    dog.set_light("green", bps=2)
+
+    dog.head_move(
+        yaw=0,
+        roll=0,
+        pitch=0,
+        speed=180
+    )
+
+    dog.stand(speed=180)
+
+    pause(RESET_TIME)
 
 
 # =================================================
@@ -39,8 +73,9 @@ def run_christmas_show(dog):
     print("STARTING CHRISTMAS PERFORMANCE")
     print("=" * 55)
 
-    # Create music player
     music = MusicPlayer()
+
+    start_time = time.monotonic()
 
     try:
 
@@ -52,37 +87,37 @@ def run_christmas_show(dog):
 
         music.play(MUSIC_FILE)
 
-        show_start = time.time()
-
-
         # =============================================
         # OPENING
         # =============================================
 
         print("\nChristmas Opening")
 
-        dog.set_light("red", bps=3)
+        dog.set_light(
+            "red",
+            bps=3
+        )
 
-        dog.stand(speed=180)
-        pause(1)
+        dog.stand(
+            speed=180
+        )
 
-        dog.wag_tail(count=4, speed=190)
-        pause(1)
-
+        dog.wag_tail(
+            count=4,
+            speed=190
+        )
 
         # =============================================
-        # DANCE LOOP
-        # Continue dancing until approximately
-        # 60 seconds have passed.
+        # FULL SONG CHOREOGRAPHY
         # =============================================
 
         dance_round = 1
 
         while True:
 
-            elapsed = time.time() - show_start
+            elapsed = time.monotonic() - start_time
 
-            if elapsed >= SHOW_DURATION:
+            if elapsed >= SONG_DURATION:
                 break
 
             print(
@@ -93,10 +128,20 @@ def run_christmas_show(dog):
             # GREEN SECTION
             # -----------------------------------------
 
-            dog.set_light("green", bps=4)
+            dog.set_light(
+                "green",
+                bps=4
+            )
 
-            dog.head_move(yaw=25, speed=190)
-            dog.head_move(yaw=-25, speed=190)
+            dog.head_move(
+                yaw=25,
+                speed=190
+            )
+
+            dog.head_move(
+                yaw=-25,
+                speed=190
+            )
 
             dog.turn_left(
                 steps=1,
@@ -117,7 +162,10 @@ def run_christmas_show(dog):
             # BLUE SECTION
             # -----------------------------------------
 
-            dog.set_light("blue", bps=4)
+            dog.set_light(
+                "blue",
+                bps=4
+            )
 
             dog.forward(
                 steps=1,
@@ -133,7 +181,10 @@ def run_christmas_show(dog):
             # SPECIAL MOVE
             # -----------------------------------------
 
-            dog.set_light("yellow", bps=5)
+            dog.set_light(
+                "yellow",
+                bps=5
+            )
 
             dog.push_up(
                 speed=180,
@@ -141,10 +192,13 @@ def run_christmas_show(dog):
             )
 
             # -----------------------------------------
-            # PERSONALITY MOVEMENT
+            # PERSONALITY
             # -----------------------------------------
 
-            dog.set_light("red", bps=5)
+            dog.set_light(
+                "red",
+                bps=5
+            )
 
             dog.head_move(
                 yaw=30,
@@ -163,46 +217,30 @@ def run_christmas_show(dog):
 
             dance_round += 1
 
-
         # =============================================
-        # FINALE
+        # SONG FINISHED
         # =============================================
 
-        print("\nChristmas Finale!")
-
-        dog.set_light("green", bps=5)
-
-        dog.wag_tail(
-            count=8,
-            speed=200
-        )
-
-        dog.head_move(
-            yaw=25,
-            speed=190
-        )
-
-        dog.head_move(
-            yaw=-25,
-            speed=190
-        )
-
-        dog.head_move(
-            yaw=0,
-            speed=180
-        )
-
-        dog.sit(speed=180)
-
-
-    finally:
-
-        # =============================================
-        # STOP MUSIC
-        # =============================================
+        print("\nChristmas song finished.")
 
         music.stop()
 
+        # =============================================
+        # RESET POSTURE
+        # =============================================
+
+        return_to_home(dog)
+
+        elapsed = time.monotonic() - start_time
+
         print(
-            "\nChristmas Performance Complete!"
+            f"\nChristmas Performance Complete!"
         )
+
+        print(
+            f"Total performance time: {elapsed:.1f} seconds"
+        )
+
+    finally:
+
+        music.stop()

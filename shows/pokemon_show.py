@@ -2,16 +2,14 @@
 PiDog Final Project
 Pokemon Performance
 
-Approximate Duration: 1 Minute
-
-Features:
-- Pokemon music playing in the background
-- PiDog choreography
-- RGB light effects
-- Automatic music stop after the performance
+Timing:
+- Pokemon song: 58 seconds
+- Post-song reset: approximately 1.5 seconds
 """
 
+import os
 import time
+
 from audio.music_player import MusicPlayer
 
 
@@ -19,14 +17,55 @@ from audio.music_player import MusicPlayer
 # SETTINGS
 # =================================================
 
-SHOW_DURATION = 60
+SONG_DURATION = 58.0
+RESET_TIME = 1.5
 
-MUSIC_FILE = "music/pokemon_song.wav"
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
 
+MUSIC_FILE = os.path.join(
+    BASE_DIR,
+    "music",
+    "pokemon_song.wav"
+)
+
+
+# =================================================
+# HELPERS
+# =================================================
 
 def pause(seconds):
-    """Pause between choreography actions."""
     time.sleep(seconds)
+
+
+def return_to_home(dog):
+    """
+    Return PiDog to a stable presentation posture
+    after the music finishes.
+    """
+
+    print("\nReturning PiDog to home posture...")
+
+    dog.set_light(
+        "green",
+        bps=2
+    )
+
+    dog.head_move(
+        yaw=0,
+        roll=0,
+        pitch=0,
+        speed=180
+    )
+
+    dog.stand(
+        speed=180
+    )
+
+    pause(RESET_TIME)
 
 
 # =================================================
@@ -39,8 +78,9 @@ def run_pokemon_show(dog):
     print("STARTING POKEMON PERFORMANCE")
     print("=" * 55)
 
-    # Create music player
     music = MusicPlayer()
+
+    start_time = time.monotonic()
 
     try:
 
@@ -52,19 +92,20 @@ def run_pokemon_show(dog):
 
         music.play(MUSIC_FILE)
 
-        show_start = time.time()
-
-
         # =============================================
         # OPENING
         # =============================================
 
         print("\nPokemon Opening")
 
-        dog.set_light("yellow", bps=4)
+        dog.set_light(
+            "yellow",
+            bps=4
+        )
 
-        dog.stand(speed=190)
-        pause(1)
+        dog.stand(
+            speed=190
+        )
 
         dog.head_move(
             yaw=30,
@@ -86,18 +127,17 @@ def run_pokemon_show(dog):
             speed=200
         )
 
-
         # =============================================
-        # MAIN DANCE LOOP
+        # FULL SONG CHOREOGRAPHY
         # =============================================
 
         dance_round = 1
 
         while True:
 
-            elapsed = time.time() - show_start
+            elapsed = time.monotonic() - start_time
 
-            if elapsed >= SHOW_DURATION:
+            if elapsed >= SONG_DURATION:
                 break
 
             print(
@@ -105,7 +145,7 @@ def run_pokemon_show(dog):
             )
 
             # -----------------------------------------
-            # BLUE SECTION
+            # MOVEMENT
             # -----------------------------------------
 
             dog.set_light(
@@ -133,7 +173,6 @@ def run_pokemon_show(dog):
                 speed=190
             )
 
-
             # -----------------------------------------
             # HEAD RHYTHM
             # -----------------------------------------
@@ -158,9 +197,8 @@ def run_pokemon_show(dog):
                 speed=200
             )
 
-
             # -----------------------------------------
-            # PUSH-UP SPECIAL MOVE
+            # PUSH-UP
             # -----------------------------------------
 
             dog.set_light(
@@ -173,9 +211,8 @@ def run_pokemon_show(dog):
                 repetitions=1
             )
 
-
             # -----------------------------------------
-            # TAIL / ENERGY MOVE
+            # ENERGY
             # -----------------------------------------
 
             dog.set_light(
@@ -190,66 +227,30 @@ def run_pokemon_show(dog):
 
             dance_round += 1
 
-
         # =============================================
-        # FINALE
+        # SONG FINISHED
         # =============================================
 
-        print("\nPokemon Finale!")
-
-        dog.set_light(
-            "yellow",
-            bps=6
-        )
-
-        dog.stretch(
-            speed=190
-        )
-
-        pause(0.5)
-
-        dog.stand(
-            speed=190
-        )
-
-        dog.head_move(
-            yaw=35,
-            speed=200
-        )
-
-        dog.head_move(
-            yaw=-35,
-            speed=200
-        )
-
-        dog.head_move(
-            yaw=0,
-            speed=200
-        )
-
-        dog.wag_tail(
-            count=10,
-            speed=200
-        )
-
-        dog.set_light(
-            "green",
-            bps=5
-        )
-
-        dog.sit(
-            speed=190
-        )
-
-
-    finally:
-
-        # =============================================
-        # STOP MUSIC
-        # =============================================
+        print("\nPokemon song finished.")
 
         music.stop()
 
+        # =============================================
+        # RESET POSTURE
+        # =============================================
+
+        return_to_home(dog)
+
+        elapsed = time.monotonic() - start_time
+
         print(
-            "\nPokemon Performance Complete!"
+            f"\nPokemon Performance Complete!"
         )
+
+        print(
+            f"Total performance time: {elapsed:.1f} seconds"
+        )
+
+    finally:
+
+        music.stop()

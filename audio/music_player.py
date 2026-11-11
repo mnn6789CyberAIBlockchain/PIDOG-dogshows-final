@@ -2,20 +2,16 @@
 PiDog Final Project
 Cross-Platform Music Player
 
-Plays WAV music files during PiDog performances.
-
 Windows:
-    Uses winsound.
+    Uses winsound for WAV playback.
 
-Linux / Raspberry Pi:
-    Uses aplay.
+Raspberry Pi / Linux:
+    Uses aplay for WAV playback.
 """
 
 import os
 import platform
 import subprocess
-import threading
-import winsound
 
 
 class MusicPlayer:
@@ -26,14 +22,13 @@ class MusicPlayer:
         self.system = platform.system()
 
 
-    # =================================================
-    # PLAY MUSIC
-    # =================================================
-
     def play(self, music_file):
 
-        # Stop existing music first
+        # Stop currently playing music first
         self.stop()
+
+        # Convert to an absolute path
+        music_file = os.path.abspath(music_file)
 
         if not os.path.exists(music_file):
 
@@ -43,6 +38,7 @@ class MusicPlayer:
 
         print(f"Playing music: {music_file}")
 
+
         # =============================================
         # WINDOWS
         # =============================================
@@ -51,27 +47,33 @@ class MusicPlayer:
 
             try:
 
-                self.process = threading.Thread(
-                    target=winsound.PlaySound,
-                    args=(
-                        music_file,
-                        winsound.SND_FILENAME
-                    ),
-                    daemon=True
+                self.process = subprocess.Popen(
+                    [
+                        "powershell",
+                        "-c",
+                        (
+                            "Add-Type -AssemblyName presentationCore; "
+                            "$player = New-Object "
+                            "System.Windows.Media.MediaPlayer; "
+                            f"$player.Open([uri]'{music_file}'); "
+                            "$player.Play(); "
+                            "Start-Sleep -Seconds 120"
+                        )
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
                 )
-
-                self.process.start()
 
             except Exception as error:
 
-                print(f"Windows music error: {error}")
+                print(f"Windows audio error: {error}")
 
 
         # =============================================
         # LINUX / RASPBERRY PI
         # =============================================
 
-        else:
+        elif self.system == "Linux":
 
             try:
 
@@ -82,60 +84,50 @@ class MusicPlayer:
             except FileNotFoundError:
 
                 print(
-                    "Audio player not available."
+                    "Audio player 'aplay' was not found."
+                )
+
+                print(
+                    "Install ALSA utilities:"
+                )
+
+                print(
+                    "sudo apt install alsa-utils"
                 )
 
 
-    # =================================================
-    # STOP MUSIC
-    # =================================================
-
-    def stop(self):
-
-        if self.process is None:
-
-            return
-
-        print("Stopping music...")
-
         # =============================================
-        # WINDOWS
-        # =============================================
-
-        if self.system == "Windows":
-
-            try:
-
-                winsound.PlaySound(
-                    None,
-                    winsound.SND_PURGE
-                )
-
-            except Exception:
-
-                pass
-
-
-        # =============================================
-        # LINUX / RASPBERRY PI
+        # OTHER SYSTEMS
         # =============================================
 
         else:
+
+            print(
+                f"Unsupported operating system: "
+                f"{self.system}"
+            )
+
+
+    def stop(self):
+
+        if self.process is not None:
+
+            print("Stopping music...")
 
             try:
 
                 self.process.terminate()
 
-                self.process.wait(timeout=2)
+                self.process.wait(timeout=3)
+
+            except subprocess.TimeoutExpired:
+
+                self.process.kill()
 
             except Exception:
 
-                try:
+                pass
 
-                    self.process.kill()
+            finally:
 
-                except Exception:
-
-                    pass
-
-        self.process = None
+                self.process = None
