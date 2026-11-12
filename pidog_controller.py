@@ -265,7 +265,37 @@ class PiDogController:
 
                 print("⚠️ RGB lights unavailable.")
 
+  
     # =================================================
+    # TEXT TO SPEECH
+    # =================================================
+
+    def speak(self, text):
+
+        if not text:
+            return
+
+        print(f"🔊 PiDog speaking: {text}")
+
+        try:
+
+            import subprocess
+
+            subprocess.run(
+                [
+                    "espeak",
+                    "-s", "155",
+                    text
+                ],
+                check=False
+            )
+
+        except Exception as error:
+
+            print(f"⚠️ Speech error: {error}")
+
+
+  # =================================================
     # STOP
     # =================================================
 

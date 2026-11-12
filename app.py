@@ -118,6 +118,7 @@ def ai_mode(dog):
 
         # Show AI response
         print(f"\nPiDog: {answer}")
+	dog.speak(answer)
 
         # Happy reaction
         happy_reaction(dog)
