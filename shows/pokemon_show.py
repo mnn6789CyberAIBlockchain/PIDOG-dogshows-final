@@ -5,6 +5,9 @@ Pokemon Performance
 Timing:
 - Pokemon song: 58 seconds
 - Post-song reset: approximately 1.5 seconds
+
+This version uses slower, safer movements to help
+PiDog maintain balance during the performance.
 """
 
 import os
@@ -58,11 +61,11 @@ def return_to_home(dog):
         yaw=0,
         roll=0,
         pitch=0,
-        speed=180
+        speed=130
     )
 
     dog.stand(
-        speed=180
+        speed=130
     )
 
     pause(RESET_TIME)
@@ -100,31 +103,31 @@ def run_pokemon_show(dog):
 
         dog.set_light(
             "yellow",
-            bps=4
+            bps=3
         )
 
         dog.stand(
-            speed=190
+            speed=130
         )
 
         dog.head_move(
             yaw=30,
-            speed=190
+            speed=140
         )
 
         dog.head_move(
             yaw=-30,
-            speed=190
+            speed=140
         )
 
         dog.head_move(
             yaw=0,
-            speed=190
+            speed=140
         )
 
         dog.wag_tail(
             count=4,
-            speed=200
+            speed=150
         )
 
         # =============================================
@@ -150,27 +153,27 @@ def run_pokemon_show(dog):
 
             dog.set_light(
                 "blue",
-                bps=5
+                bps=4
             )
 
             dog.forward(
                 steps=1,
-                speed=190
+                speed=125
             )
 
             dog.turn_left(
                 steps=1,
-                speed=190
+                speed=130
             )
 
             dog.backward(
                 steps=1,
-                speed=190
+                speed=125
             )
 
             dog.turn_right(
                 steps=1,
-                speed=190
+                speed=130
             )
 
             # -----------------------------------------
@@ -179,22 +182,22 @@ def run_pokemon_show(dog):
 
             dog.set_light(
                 "red",
-                bps=5
+                bps=4
             )
 
             dog.head_move(
                 yaw=35,
-                speed=200
+                speed=145
             )
 
             dog.head_move(
                 yaw=-35,
-                speed=200
+                speed=145
             )
 
             dog.head_move(
                 yaw=0,
-                speed=200
+                speed=145
             )
 
             # -----------------------------------------
@@ -203,11 +206,11 @@ def run_pokemon_show(dog):
 
             dog.set_light(
                 "yellow",
-                bps=6
+                bps=4
             )
 
             dog.push_up(
-                speed=190,
+                speed=130,
                 repetitions=1
             )
 
@@ -217,12 +220,12 @@ def run_pokemon_show(dog):
 
             dog.set_light(
                 "green",
-                bps=6
+                bps=4
             )
 
             dog.wag_tail(
                 count=5,
-                speed=200
+                speed=150
             )
 
             dance_round += 1
@@ -244,7 +247,7 @@ def run_pokemon_show(dog):
         elapsed = time.monotonic() - start_time
 
         print(
-            f"\nPokemon Performance Complete!"
+            "\nPokemon Performance Complete!"
         )
 
         print(

@@ -4,20 +4,33 @@ Interactive Human-PiDog Show
 
 This performance demonstrates:
 
-1. PiDog gets the audience's attention after a clap.
+1. PiDog gets the audience's attention.
 2. The interviewer says: "PiDog, come here!"
 3. PiDog walks toward the interviewer.
 4. The interviewer says: "PiDog, high five!"
-5. PiDog performs a right paw high five.
-6. PiDog performs a left paw high five.
-7. PiDog celebrates and transitions to AI Q&A.
-
-The sensor-based clap detection will be tested and
-connected to the real PiDog hardware on the Raspberry Pi.
+5. PiDog performs the high-five demonstration.
+6. PiDog celebrates.
+7. PiDog answers questions using local Ollama AI.
 """
 
-
 import time
+
+from ai.ollama_brain import ask_pidog
+
+
+# =================================================
+# HELPER: PIDOG SPEAKING
+# =================================================
+
+def speak(dog, text):
+    """Make PiDog speak and briefly pause."""
+
+    print(f"\n🔊 PiDog: {text}")
+
+    dog.speak(text)
+
+    # Small pause so actions do not immediately interrupt speech
+    time.sleep(0.5)
 
 
 # =================================================
@@ -30,11 +43,14 @@ def attention_reaction(dog):
     print("INTERACTIVE MODE: ATTENTION DETECTED")
     print("=" * 55)
 
-    print("\nPiDog noticed the audience!")
-
     dog.set_light("yellow", bps=2)
 
-    # Look toward the audience.
+    speak(
+        dog,
+        "Hello everyone! I noticed you."
+    )
+
+    # Look toward the audience
     dog.head_move(
         yaw=25,
         pitch=10,
@@ -57,10 +73,9 @@ def attention_reaction(dog):
         speed=150
     )
 
-    # Friendly reaction.
     dog.wag_tail(
         count=2,
-        speed=180
+        speed=160
     )
 
     time.sleep(1)
@@ -74,42 +89,41 @@ def come_here(dog):
 
     print("\nInterviewer: PiDog, come here!")
 
-    print("\nPiDog is approaching...")
-
     dog.set_light("blue", bps=2)
 
-    # Make sure PiDog is standing before walking.
-    dog.stand(speed=160)
-
-    time.sleep(1)
-
-    # Controlled approach.
-    #
-    # IMPORTANT:
-    # We will tune the number of steps on the real PiDog
-    # depending on the actual distance to the interviewer.
-    dog.forward(
-        steps=2,
-        speed=150
+    speak(
+        dog,
+        "Okay! I am coming."
     )
 
+    # Make sure PiDog is standing before walking
+    dog.stand(speed=140)
+
     time.sleep(1)
 
+    # Controlled approach
     dog.forward(
         steps=1,
-        speed=130
+        speed=120
     )
 
-    # Stop safely.
+    time.sleep(1)
+
+    # Stop safely
     dog.stop()
 
     print("\nPiDog has reached the interviewer!")
 
     dog.set_light("green", bps=2)
 
+    speak(
+        dog,
+        "I am here!"
+    )
+
     dog.wag_tail(
         count=2,
-        speed=170
+        speed=160
     )
 
     time.sleep(1)
@@ -123,61 +137,67 @@ def high_five(dog):
 
     print("\nInterviewer: PiDog, high five!")
 
-    print("\nPiDog is ready for a high five!")
-
     dog.set_light("purple", bps=2)
+
+    speak(
+        dog,
+        "High five!"
+    )
 
     time.sleep(1)
 
     # -------------------------------------------------
-    # RIGHT PAW HIGH FIVE
+    # RIGHT PAW DEMONSTRATION
     # -------------------------------------------------
 
     print("\nRIGHT PAW HIGH FIVE!")
 
-    # Temporary choreography movement.
-    #
-    # The exact individual-leg API will be verified
-    # on the real PiDog before the final demonstration.
     dog.head_move(
         yaw=15,
-        pitch=15,
-        speed=150
+        pitch=10,
+        speed=140
     )
 
-    dog.stretch(speed=140)
+    # Use controlled movement
+    dog.stretch(speed=120)
 
     time.sleep(1)
 
-    print("High five!")
+    speak(
+        dog,
+        "Right paw!"
+    )
 
     time.sleep(1)
 
-    dog.stand(speed=150)
+    dog.stand(speed=130)
 
     time.sleep(1)
 
     # -------------------------------------------------
-    # LEFT PAW HIGH FIVE
+    # LEFT PAW DEMONSTRATION
     # -------------------------------------------------
 
     print("\nLEFT PAW HIGH FIVE!")
 
     dog.head_move(
         yaw=-15,
-        pitch=15,
-        speed=150
+        pitch=10,
+        speed=140
     )
 
-    dog.stretch(speed=140)
+    dog.stretch(speed=120)
 
     time.sleep(1)
 
-    print("High five!")
+    speak(
+        dog,
+        "And left paw!"
+    )
 
     time.sleep(1)
 
-    dog.stand(speed=150)
+    dog.stand(speed=130)
 
     time.sleep(1)
 
@@ -189,27 +209,94 @@ def high_five(dog):
 
     dog.set_light("green", bps=3)
 
+    speak(
+        dog,
+        "That was fun!"
+    )
+
     dog.wag_tail(
-        count=4,
-        speed=190
+        count=3,
+        speed=160
     )
 
     dog.head_move(
-        yaw=20,
-        speed=170
+        yaw=15,
+        speed=150
     )
 
     dog.head_move(
-        yaw=-20,
-        speed=170
+        yaw=-15,
+        speed=150
     )
 
     dog.head_move(
         yaw=0,
-        speed=170
+        speed=150
     )
 
     time.sleep(1)
+
+
+# =================================================
+# AI QUESTION AND ANSWER
+# =================================================
+
+def interactive_ai_questions(dog):
+
+    print("\n" + "=" * 60)
+    print("PIDOG INTERACTIVE AI QUESTION AND ANSWER")
+    print("=" * 60)
+
+    dog.set_light("yellow", bps=2)
+
+    speak(
+        dog,
+        "Now you can ask me questions. Type exit when you are finished."
+    )
+
+    while True:
+
+        print("\nPiDog is listening...")
+        dog.set_light("yellow", bps=2)
+
+        question = input("\nYou: ").strip()
+
+        # Exit Q&A
+        if question.lower() in ["exit", "quit", "bye"]:
+
+            speak(
+                dog,
+                "Thank you for talking with me. Goodbye!"
+            )
+
+            break
+
+        # Ignore empty questions
+        if not question:
+            continue
+
+        print("\nPiDog is thinking...")
+
+        dog.set_light("blue", bps=2)
+
+        # Ask local Ollama AI
+        answer = ask_pidog(question)
+
+        # Display answer
+        print(f"\nPiDog: {answer}")
+
+        # Speak answer through PiDog speaker
+        dog.speak(answer)
+
+        # Happy reaction
+        dog.set_light("green", bps=2)
+
+        dog.wag_tail(
+            count=1,
+            speed=150
+        )
+
+        time.sleep(0.5)
 
 
 # =================================================
@@ -223,7 +310,7 @@ def run_interactive_show(dog):
     print("=" * 60)
 
     # ---------------------------------------------
-    # STEP 1 — CLAP / ATTENTION
+    # STEP 1 — ATTENTION
     # ---------------------------------------------
 
     input(
@@ -253,6 +340,16 @@ def run_interactive_show(dog):
     )
 
     high_five(dog)
+
+    # ---------------------------------------------
+    # STEP 4 — AI QUESTIONS
+    # ---------------------------------------------
+
+    input(
+        "\nPress ENTER to begin PiDog AI Question and Answer..."
+    )
+
+    interactive_ai_questions(dog)
 
     print("\n" + "=" * 60)
     print("INTERACTIVE PERFORMANCE COMPLETE!")
