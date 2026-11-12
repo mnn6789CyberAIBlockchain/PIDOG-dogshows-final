@@ -2,10 +2,9 @@
 PiDog Final Project
 Introduction Performance
 
-Approximate Duration: 1 Minute
-
 PiDog introduces itself using:
-- Movement
+- Voice narration
+- Safe movement
 - Head actions
 - Tail wagging
 - RGB lights
@@ -17,6 +16,12 @@ import time
 def pause(seconds):
     """Pause between performance actions."""
     time.sleep(seconds)
+
+
+def speak(dog, text):
+    """Speak and pause briefly for a stable performance."""
+    dog.speak(text)
+    pause(0.5)
 
 
 def run_introduction_show(dog):
@@ -33,16 +38,19 @@ def run_introduction_show(dog):
 
     dog.set_light("blue", bps=2)
 
-    dog.stand(speed=180)
-    pause(1)
+    dog.stand(speed=120)
+    pause(2)
 
-    dog.forward(steps=2, speed=180)
-    pause(1)
+    speak(
+        dog,
+        "Hello everyone! My name is PiDog."
+    )
 
-    dog.turn_left(steps=1, speed=180)
-    pause(1)
+    # Safer: only one forward step
+    dog.forward(steps=1, speed=110)
+    pause(2)
 
-    dog.wag_tail(count=4, speed=190)
+    dog.wag_tail(count=3, speed=140)
     pause(1)
 
     # =================================================
@@ -51,18 +59,25 @@ def run_introduction_show(dog):
 
     print("\n[2/5] GREETING THE AUDIENCE")
 
-    dog.set_light("green", bps=3)
+    dog.set_light("green", bps=2)
 
-    dog.head_move(yaw=30, speed=180)
+    speak(
+        dog,
+        "I am a friendly AI-powered robotic dog "
+        "created as part of a university final project."
+    )
+
+    # Slower head movements are much safer than fast body turns
+    dog.head_move(yaw=25, speed=120)
     pause(1)
 
-    dog.head_move(yaw=-30, speed=180)
+    dog.head_move(yaw=-25, speed=120)
     pause(1)
 
-    dog.head_move(yaw=0, speed=180)
+    dog.head_move(yaw=0, speed=120)
     pause(1)
 
-    dog.wag_tail(count=5, speed=190)
+    dog.wag_tail(count=4, speed=140)
     pause(1)
 
     # =================================================
@@ -71,39 +86,57 @@ def run_introduction_show(dog):
 
     print("\n[3/5] MOVEMENT DEMONSTRATION")
 
-    dog.set_light("yellow", bps=3)
+    dog.set_light("yellow", bps=2)
 
-    dog.forward(steps=2, speed=180)
+    speak(
+        dog,
+        "I can walk, turn, move my head, "
+        "wag my tail, and perform interactive shows."
+    )
+
+    # SAFER MOVEMENT DEMONSTRATION
+    dog.forward(steps=1, speed=110)
+    pause(2)
+
+    dog.stand(speed=110)
+    pause(2)
+
+    # Head movement instead of risky fast turning
+    dog.head_move(yaw=30, speed=120)
     pause(1)
 
-    dog.turn_right(steps=1, speed=180)
+    dog.head_move(yaw=-30, speed=120)
     pause(1)
 
-    dog.backward(steps=1, speed=180)
-    pause(1)
-
-    dog.stand(speed=180)
-    pause(1)
+    dog.head_move(yaw=0, speed=120)
+    pause(2)
 
     # =================================================
-    # SECTION 4 - ROBOT PERSONALITY
+    # SECTION 4 - AI PERSONALITY
     # =================================================
 
-    print("\n[4/5] ROBOT PERSONALITY")
+    print("\n[4/5] AI PERSONALITY")
 
-    dog.set_light("purple", bps=4)
+    dog.set_light("purple", bps=3)
+
+    speak(
+        dog,
+        "I also have an AI brain powered by Ollama. "
+        "You can ask me questions, and I can respond."
+    )
 
     for _ in range(2):
 
-        dog.head_move(yaw=25, speed=190)
-        pause(0.5)
+        dog.head_move(yaw=20, speed=120)
+        pause(0.7)
 
-        dog.head_move(yaw=-25, speed=190)
-        pause(0.5)
+        dog.head_move(yaw=-20, speed=120)
+        pause(0.7)
 
-    dog.head_move(yaw=0, speed=180)
+    dog.head_move(yaw=0, speed=120)
+    pause(1)
 
-    dog.wag_tail(count=6, speed=200)
+    dog.wag_tail(count=5, speed=150)
     pause(1)
 
     # =================================================
@@ -112,18 +145,30 @@ def run_introduction_show(dog):
 
     print("\n[5/5] INTRODUCTION FINALE")
 
-    dog.set_light("red", bps=4)
+    dog.set_light("red", bps=3)
 
-    dog.stretch(speed=180)
+    speak(
+        dog,
+        "Thank you for watching my performance!"
+    )
+
     pause(1)
 
-    dog.stand(speed=180)
+    # Keep finale simple and stable
+    dog.stand(speed=110)
     pause(1)
 
-    dog.set_light("green", bps=5)
+    dog.set_light("green", bps=3)
 
-    dog.wag_tail(count=8, speed=200)
+    dog.wag_tail(count=6, speed=150)
+    pause(1)
 
-    dog.sit(speed=180)
+    speak(
+        dog,
+        "I am PiDog, your AI-powered robotic performer. "
+        "Thank you!"
+    )
+
+    dog.sit(speed=110)
 
     print("\nPiDog Introduction Performance Complete!")
