@@ -1,4 +1,3 @@
-
 """
 PiDog Final Project - Hardware Controller
 
@@ -54,10 +53,12 @@ class PiDogController:
     def action(self, name, speed=150, step_count=1):
 
         if not self.connected:
+
             print(
                 f"🐶 [SIMULATION] Action: {name} "
                 f"Speed={speed} Steps={step_count}"
             )
+
             return
 
         print(f"🐶 Performing action: {name}")
@@ -194,27 +195,75 @@ class PiDogController:
             step_count=count
         )
 
-
     # =================================================
     # RGB LIGHTS
     # =================================================
 
     def set_light(self, color="red", bps=1):
 
+        # PiDog-supported colors
+        color_map = {
+            "white": "white",
+            "black": "black",
+            "red": "red",
+            "yellow": "yellow",
+            "green": "green",
+            "blue": "blue",
+            "cyan": "cyan",
+            "magenta": "magenta",
+            "pink": "pink",
+
+            # Friendly aliases used by our project
+            "purple": "magenta",
+            "orange": "yellow"
+        }
+
+        requested_color = str(color).lower()
+
+        # Unknown colors safely become blue
+        safe_color = color_map.get(
+            requested_color,
+            "blue"
+        )
+
         if not self.connected:
 
             print(
-                f"💡 [SIMULATION] Light → {color}"
+                f"💡 [SIMULATION] Light → "
+                f"{requested_color} "
+                f"(using {safe_color})"
             )
 
             return
 
-        self.dog.rgb_strip.set_mode(
-            "breath",
-            color,
-            bps=bps
+        print(
+            f"💡 Light → {requested_color} "
+            f"(using {safe_color})"
         )
 
+        try:
+
+            self.dog.rgb_strip.set_mode(
+                "breath",
+                safe_color,
+                bps=bps
+            )
+
+        except Exception as error:
+
+            print(f"⚠️ RGB error: {error}")
+
+            try:
+
+                self.dog.rgb_strip.set_mode(
+                    "breath",
+                    "blue",
+                    bps=bps
+                )
+
+            except Exception:
+
+                print("⚠️ RGB lights unavailable.")
 
     # =================================================
     # STOP
@@ -244,6 +293,17 @@ class PiDogController:
 
             print("🐶 Closing PiDog connection...")
 
-            self.dog.close()
+            try:
+                self.dog.close()
 
-            self.connected = False
+            except Exception as error:
+
+                print(
+                    f"⚠️ Error while closing PiDog: "
+                    f"{error}"
+                )
+
+            finally:
+
+                self.connected = False
+                self.dog = None
